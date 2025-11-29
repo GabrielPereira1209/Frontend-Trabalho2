@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VagasJá - Plataforma de Aluguel de Vagas</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>VagasJá</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Início</a>
+                <a href="pages/search.html" class="nav-link">Buscar Vagas</a>
+                <a href="pages/profile.html" class="nav-link" style="display: none;">Perfil</a>
+                <a href="pages/my-spots.html" class="nav-link" style="display: none;">Minhas Vagas</a>
+                <a href="pages/my-rentals.html" class="nav-link" style="display: none;">Minhas Reservas</a>
+                <a href="pages/login.html" class="nav-link">Entrar</a>
+                <a href="pages/register.html" class="nav-link">Cadastrar</a>
+                <div class="nav-user hidden" id="nav-user">
+                    <span id="user-name"></span>
+                    <button onclick="logout()" class="btn btn-secondary">Sair</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section id="home" class="section active">
+        <div class="hero">
+            <div class="hero-content">
+                <h1>Encontre a vaga perfeita ou alugue sua vaga</h1>
+                <p>A plataforma que conecta quem precisa de uma vaga com quem tem uma disponível</p>
+                <div class="hero-buttons">
+                    <a href="pages/search.html" class="btn btn-primary btn-large">Buscar Vagas</a>
+                    <a href="pages/login.html" class="btn btn-secondary btn-large">Anunciar Vaga</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="container">
+                <h2>Por que escolher o VagasJá?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🅿️</div>
+                        <h3>Vagas Verificadas</h3>
+                        <p>Todas as vagas são verificadas para garantir qualidade e segurança</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>Preços Justos</h3>
+                        <p>Encontre vagas com preços competitivos em toda a cidade</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>Fácil de Usar</h3>
+                        <p>Interface simples e intuitiva para uma experiência perfeita</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Seguro</h3>
+                        <p>Transações seguras e dados protegidos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="toast" id="toast">
+        <span id="toast-message"></span>
+        <span class="toast-close" onclick="hideToast()">&times;</span>
+    </div>
+
+    <script src="dist/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () { });
+    </script>
+</body>
+
+</html>

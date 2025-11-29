@@ -1,0 +1,13 @@
+{
+  "name": "vagasja-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && npx http-server -c-1 . -p 5173"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "http-server": "^14.1.1"
+  }
+}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VagasJá - Minhas Vagas</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>VagasJá</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="../index.html" class="nav-link">Início</a>
+                <a href="search.html" class="nav-link">Buscar Vagas</a>
+                <a href="profile.html" class="nav-link" style="display: none;">Perfil</a>
+                <a href="my-spots.html" class="nav-link" style="display: none;">Minhas Vagas</a>
+                <a href="my-rentals.html" class="nav-link" style="display: none;">Minhas Reservas</a>
+                <a href="login.html" class="nav-link">Entrar</a>
+                <a href="register.html" class="nav-link">Cadastrar</a>
+                <div class="nav-user hidden" id="nav-user">
+                    <span id="user-name"></span>
+                    <button onclick="logout()" class="btn btn-secondary">Sair</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <section id="my-spots" class="section active">
+        <div class="container">
+            <div class="page-header">
+                <h2>Minhas Vagas</h2>
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <button id="owner-history-btn" class="btn" style="display:none;" onclick="window.location.href='owner-history.html'">Ver Histórico</button>
+                    <button class="btn btn-primary" onclick="showAddSpotModal()">Adicionar Vaga</button>
+                </div>
+            </div>
+            <div class="spots-grid" id="my-spots-grid">
+            </div>
+        </div>
+    </section>
+
+    <div class="modal" id="spot-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="spot-modal-title">Adicionar Vaga</h3>
+                <span class="close" onclick="closeSpotModal()">&times;</span>
+            </div>
+            <form id="spot-form" onsubmit="handleSpotSubmit(event)">
+                <div class="form-group">
+                    <label for="spot-title">Título</label>
+                    <input type="text" id="spot-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="spot-description">Descrição</label>
+                    <textarea id="spot-description" name="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="spot-location">Localização</label>
+                    <input type="text" id="spot-location" name="location" required>
+                </div>
+                <div class="form-group">
+                    <label for="spot-type">Tipo</label>
+                    <select id="spot-type" name="type" required>
+                        <option value="">Selecione</option>
+                        <option value="covered">Coberta</option>
+                        <option value="uncovered">Descoberta</option>
+                        <option value="garage">Garagem</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="spot-price">Preço por mês (R$)</label>
+                    <input type="number" id="spot-price" name="price" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="spot-available">Disponível</label>
+                    <select id="spot-available" name="available">
+                        <option value="true">Sim</option>
+                        <option value="false">Não</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeSpotModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <span id="toast-message"></span>
+        <span class="toast-close" onclick="hideToast()">&times;</span>
+    </div>
+    <script src="../dist/main.js"></script>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof checkAuthStatus === 'function') {
+                checkAuthStatus();
+            }
+            if (typeof loadMySpots === 'function') {
+                loadMySpots();
+            }
+        });
+    </script>
+</body>
+
+</html>

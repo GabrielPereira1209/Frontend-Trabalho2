@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VagasJá - Meu Perfil</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>VagasJá</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="../index.html" class="nav-link">Início</a>
+                <a href="search.html" class="nav-link">Buscar Vagas</a>
+                <a href="profile.html" class="nav-link" style="display: none;">Perfil</a>
+                <a href="my-spots.html" class="nav-link" style="display: none;">Minhas Vagas</a>
+                <a href="my-rentals.html" class="nav-link" style="display: none;">Minhas Reservas</a>
+                <a href="login.html" class="nav-link">Entrar</a>
+                <a href="register.html" class="nav-link">Cadastrar</a>
+                <div class="nav-user hidden" id="nav-user">
+                    <span id="user-name"></span>
+                    <button onclick="logout()" class="btn btn-secondary">Sair</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <section id="profile" class="section active">
+        <div class="container">
+            <div class="profile-content">
+                <div class="profile-header">
+                    <h2>Meu Perfil</h2>
+                    <button class="btn btn-secondary" onclick="changePassword()">Alterar Senha</button>
+                </div>
+                <form id="profile-form" onsubmit="handleProfileUpdate(event)">
+                    <div class="form-group">
+                        <label for="profile-name">Nome Completo</label>
+                        <input type="text" id="profile-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-email">Email</label>
+                        <input type="email" id="profile-email" name="email" required readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-phone">Telefone</label>
+                        <input type="tel" id="profile-phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-user-type">Tipo de Usuário</label>
+                        <select id="profile-user-type" name="user_type" required disabled>
+                            <option value="tenant">Locatário</option>
+                            <option value="landlord">Locador</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Atualizar Perfil</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal" id="password-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Alterar Senha</h3>
+                <span class="close" onclick="closePasswordModal()">&times;</span>
+            </div>
+            <form id="password-form" onsubmit="handlePasswordChange(event)">
+                <div class="form-group">
+                    <label for="current-password">Senha Atual</label>
+                    <input type="password" id="current-password" name="current_password" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">Nova Senha</label>
+                    <input type="password" id="new-password" name="new_password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirm-new-password">Confirmar Nova Senha</label>
+                    <input type="password" id="confirm-new-password" name="confirm_new_password" required minlength="6">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closePasswordModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Alterar Senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <span id="toast-message"></span>
+        <span class="toast-close" onclick="hideToast()">&times;</span>
+    </div>
+    <script src="../dist/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof checkAuthStatus === 'function') {
+                checkAuthStatus();
+            }
+            if (typeof loadProfile === 'function') {
+                loadProfile();
+            }
+        });
+    </script>
+</body>
+
+</html>
