@@ -33,7 +33,7 @@ aviv02.pythonanywhere.com
 - **index.html:** Ponto de entrada do site.
 - **pages/**: Cada página representa as páginas do nosso site (login, cadastro, busca, etc).
 - **scripts/main.ts:** Toda a lógica do frontend, escrita em TypeScript.
-- **styles/main.css:** Estilos globais e responsividade.
+- **styles/main.css:** Estilos globais.
 
 ---
 
