@@ -1,9 +1,12 @@
 # Frontend - Sistema de Gerenciamento de Locação de Vagas
 
+---
 
 ## Integrantes
 - **Gabriel Araujo - 2211136**
 - **Aviv Aharon - 2211745**
+  
+---
 
 ## Descrição Geral
 
@@ -72,7 +75,8 @@ Usuários comuns e proprietários têm acesso a páginas e funcionalidades difer
    npm run start
 
    O site estará disponível em `http://localhost:5173`.
-
+   
+---
 
 ### Fluxo de Uso
 
