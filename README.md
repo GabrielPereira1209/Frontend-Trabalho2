@@ -2,8 +2,8 @@
 
 
 ## Integrantes
-** Gabriel Araujo - 2211136 **
-** Aviv Aharon - 2211745 **
+  **Gabriel Araujo - 2211136**
+  **Aviv Aharon - 2211745**
 
 ## Descrição Geral
 
