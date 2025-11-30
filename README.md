@@ -107,6 +107,7 @@ Usuários comuns e proprietários têm acesso a páginas e funcionalidades difer
 - Simulação de diferentes visões para usuários comuns e proprietários.
 - Simulação de troca e recuperação de senha.
 
+<img width="1365" height="648" alt="image" src="https://github.com/user-attachments/assets/595b6b79-6638-40c7-8601-08d966b5a950" />
 <img width="1364" height="641" alt="image" src="https://github.com/user-attachments/assets/1fdbabc5-ae8a-4c95-ae7d-7aaf03309d86" />
 <img width="1363" height="642" alt="image" src="https://github.com/user-attachments/assets/33b18af1-8702-4ff3-8a78-1b5b560a145c" />
 
