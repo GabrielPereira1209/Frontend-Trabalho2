@@ -1,4 +1,9 @@
-# VagasJá - Projeto Frontend Estático
+# Frontend - Sistema de Gerenciamento de Locação de Vagas
+
+
+## Integrantes
+** Gabriel Araujo - 2211136 **
+** Aviv Aharon - 2211745 **
 
 ## Descrição Geral
 
