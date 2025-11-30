@@ -1152,16 +1152,20 @@ function ensureRentCalendarStyles(): void {
 
 // renderiza calendario compacto dentro do modal permitindo selecao de intervalo
 function renderCalendarModal(spotId: string): void {
+    // garante que estilos do calendário estão aplicados
     ensureRentCalendarStyles();
+    // pega modal de aluguel
     const modal = document.getElementById('rent-modal') as HTMLElement;
     if (!modal) return;
 
+    // pega ou cria container do calendário
     let container = document.getElementById('rent-calendar') as HTMLElement | null;
     const form = document.getElementById('rent-form') as HTMLElement;
     if (!container) {
         container = document.createElement('div');
         container.id = 'rent-calendar';
         container.className = 'rent-calendar';
+        // insere container após campo oculto de spot ou no início do form
         if (form) {
             const spotHidden = form.querySelector('#rent-spot-id');
             if (spotHidden && spotHidden.parentElement) {
@@ -1171,7 +1175,7 @@ function renderCalendarModal(spotId: string): void {
             }
         }
     } else {
-
+        // garante que container está no lugar certo
         if (form) {
             const spotHidden = form.querySelector('#rent-spot-id');
             if (spotHidden && spotHidden.parentElement && container.parentElement !== spotHidden.parentElement) {
@@ -1180,13 +1184,17 @@ function renderCalendarModal(spotId: string): void {
         }
     }
 
+    // pega dias já reservados para o spot
     const booked: Set<string> = ((window as any)._spotBookingsCache || {})[spotId] || new Set();
 
+    // define mês base do calendário
     const today = new Date();
     const base1 = new Date(today.getFullYear(), today.getMonth() + rentCalendarMonthOffset, 1);
 
+    // limpa container
     container.innerHTML = '';
 
+    // monta header do calendário com navegação de mês
     const header = document.createElement('div');
     header.className = 'cal-header';
     const prev = document.createElement('button'); prev.type = 'button'; prev.textContent = '<';
@@ -1197,20 +1205,25 @@ function renderCalendarModal(spotId: string): void {
     header.appendChild(prev); header.appendChild(title); header.appendChild(next);
     container.appendChild(header);
 
+    // wrapper para meses (suporte a múltiplos meses se quiser)
     const wrapper = document.createElement('div'); wrapper.className = 'cal-one';
     container.appendChild(wrapper);
 
+    // define meses a exibir (atualmente só um)
     const months = [base1];
 
+    // pega seleção atual do calendário
     (window as any)._calendarSelection = (window as any)._calendarSelection || { start: null as string | null, end: null as string | null };
     const sel = (window as any)._calendarSelection;
 
     months.forEach((base) => {
+        // monta box do mês
         const monthBox = document.createElement('div'); monthBox.className = 'cal-month';
         const caption = document.createElement('div'); caption.className = 'cal-caption';
         caption.textContent = `${base.toLocaleString('pt-BR', { month: 'long' })} ${base.getFullYear()}`;
         monthBox.appendChild(caption);
 
+        // monta grid de dias da semana
         const dow = document.createElement('div'); dow.className = 'cal-grid';
         const daysOfWeek = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
         daysOfWeek.forEach(d => {
@@ -1218,28 +1231,35 @@ function renderCalendarModal(spotId: string): void {
             dow.appendChild(el);
         });
 
+        // calcula início do grid (primeiro dia visível)
         const year = base.getFullYear();
         const month = base.getMonth();
         const firstWeekday = new Date(year, month, 1).getDay();
         const startDate = new Date(year, month, 1 - firstWeekday);
 
+        // preenche 6 semanas (42 dias)
         for (let i=0;i<42;i++) {
             const d = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + i);
             const iso = formatISODate(d);
             const cell = document.createElement('div');
             cell.className = 'rent-day';
+            // marca dias de outro mês
             if (d.getMonth() !== month) cell.classList.add('other-month');
+            // marca hoje
             if (iso === formatISODate(new Date())) cell.classList.add('today');
 
+            // verifica se dia está reservado
             const isBooked = booked.has(iso);
             if (isBooked) cell.classList.add('booked');
 
+            // marca seleção de início/fim e intervalo
             if (sel.start && sel.start === iso) cell.classList.add('selected-start');
             if (sel.end && sel.end === iso) cell.classList.add('selected-end');
             if (sel.start && sel.end && sel.start <= iso && iso <= sel.end) cell.classList.add('in-range');
 
             cell.textContent = String(d.getDate());
 
+            // tooltip com info da reserva
             const nowIso = formatISODate(new Date());
             const infoMapForSpot = ((window as any)._spotBookingsInfo || {})[spotId] || {};
             if (isBooked) {
@@ -1248,9 +1268,11 @@ function renderCalendarModal(spotId: string): void {
                 cell.setAttribute('title', text);
             }
 
+            // só permite selecionar dias disponíveis e futuros
             if (!isBooked && iso >= nowIso) {
                 cell.classList.add('available');
                 cell.addEventListener('click', () => {
+                    // define início/fim da seleção
                     if (!rentCalendarActiveInput) rentCalendarActiveInput = document.getElementById('rent-start') as HTMLInputElement;
                     if (!sel.start || (sel.start && sel.end)) {
                         sel.start = iso;
@@ -1264,6 +1286,7 @@ function renderCalendarModal(spotId: string): void {
                         }
                     }
 
+                    // valida se intervalo não inclui dias reservados
                     if (sel.start && sel.end) {
                         const ds = parseDateSafe(sel.start)!;
                         const de = parseDateSafe(sel.end)!;
@@ -1285,6 +1308,7 @@ function renderCalendarModal(spotId: string): void {
                         }
                     }
 
+                    // preenche inputs do form e atualiza calendário
                     const startInput = document.getElementById('rent-start') as HTMLInputElement;
                     const endInput = document.getElementById('rent-end') as HTMLInputElement;
                     if (startInput) startInput.value = sel.start || '';
@@ -1301,6 +1325,7 @@ function renderCalendarModal(spotId: string): void {
         wrapper.appendChild(monthBox);
     });
 
+    // controles extras (limpar seleção)
     const controls = document.createElement('div'); controls.style.marginTop = '6px';
     const clearBtn = document.createElement('button'); clearBtn.type = 'button'; clearBtn.textContent = 'Limpar seleção';
     clearBtn.addEventListener('click', () => {
