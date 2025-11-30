@@ -1,12 +1,12 @@
-// url base da api
+// url base da api usada para todas as requisições
 const API_BASE_URL = 'http://localhost:8000/api'; 
 
-// estado do usuario atual
+// armazena o usuário atualmente autenticado
 let currentUser: any = null;
 let currentSection: string = 'home';
 let currentEditingSpotId: string | null = null;
 
-// tipo que representa um usuario
+// define o formato dos dados de um usuário
 interface User {
     id: string;
     email: string;
@@ -15,7 +15,7 @@ interface User {
     user_type: 'tenant' | 'landlord';
 }
 
-// tipo que representa uma vaga
+// define o formato dos dados de uma vaga
 interface Spot {
     id: string;
     title: string;
@@ -29,7 +29,7 @@ interface Spot {
     owner_email?: string;
 }
 
-// tipo que representa um aluguel/solicitacao
+// define o formato dos dados de um aluguel
 interface Rental {
     id: string;
     spot: Spot;
@@ -41,7 +41,7 @@ interface Rental {
     monthly_price: number;
 }
 
-// mostra uma notificacao toast na tela
+// exibe uma notificação toast na tela
 function showToast(message: string, type: 'success' | 'error' = 'success'): void {
     const toast = document.getElementById('toast') as HTMLElement;
     const toastMessage = document.getElementById('toast-message') as HTMLElement;
@@ -54,13 +54,13 @@ function showToast(message: string, type: 'success' | 'error' = 'success'): void
     }, 3000);
 }
 
-// esconde a notificacao toast
+// esconde a notificação toast
 function hideToast(): void {
     const toast = document.getElementById('toast') as HTMLElement;
     toast.className = 'toast';
 }
 
-// mostra indicador de carregamento em um container
+// mostra o indicador de carregamento em um container
 function showLoading(containerId: string): void {
     const container = document.getElementById(containerId);
     const loading = document.getElementById('loading');
@@ -70,7 +70,7 @@ function showLoading(containerId: string): void {
     }
 }
 
-// oculta indicador de carregamento global
+// esconde o indicador de carregamento global
 function hideLoading(): void {
     const loading = document.getElementById('loading');
     if (loading) {
@@ -78,19 +78,20 @@ function hideLoading(): void {
     }
 }
 
-// wrapper para chamadas fetch que trata headers, token e erros
+// faz requisições para a api, incluindo headers e tratamento de erros
 async function makeRequest(url: string, options: RequestInit = {}): Promise<any> {
+    // monta headers da requisição, incluindo token se existir
     const token = localStorage.getItem('auth_token');
     const headers: any = {
         'Content-Type': 'application/json',
         ...options.headers
     };
-    
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
     }
-    
+
     try {
+        // garante que endpoint termina com barra e monta query
         let endpoint = url;
         const [path, query] = endpoint.split('?');
         let fixedPath = path;
@@ -98,23 +99,24 @@ async function makeRequest(url: string, options: RequestInit = {}): Promise<any>
             fixedPath += '/';
         }
         endpoint = query ? `${fixedPath}?${query}` : fixedPath;
+        // executa fetch para a api
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             ...options,
             headers
         });
-        
+        // trata erro de resposta
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.detail || errorData.message || `HTTP ${response.status}`);
         }
-        
+        // retorna json da resposta
         return await response.json();
     } catch (error: any) {
         throw error;
     }
 }
 
-// atualiza elementos da interface conforme estado de autenticacao
+// atualiza a interface conforme o estado de autenticação do usuário
 function updateAuthState(): void {
     const navAuth = document.getElementById('nav-auth');
     const navUser = document.getElementById('nav-user');
@@ -173,7 +175,7 @@ function updateAuthState(): void {
     }
 }
 
-// verifica se ha token e busca dados do usuario autenticado
+// verifica se o usuário está autenticado e busca seus dados
 async function checkAuthStatus(): Promise<void> {
     const token = localStorage.getItem('auth_token');
     if (!token) {
@@ -193,47 +195,50 @@ async function checkAuthStatus(): Promise<void> {
     }
 }
 
-// trata submissao do form de login
+// processa o login do usuário
 async function handleLogin(event: Event): Promise<void> {
     event.preventDefault();
     
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
+    // monta objeto de login a partir do form
     const loginData = {
         email: formData.get('email') as string,
         password: formData.get('password') as string
     };
-    
+
     try {
+        // faz requisição de login
         const response = await makeRequest('/auth/login', {
             method: 'POST',
             body: JSON.stringify(loginData)
         });
-        
+        // salva token e usuário logado
         localStorage.setItem('auth_token', response.access_token);
         currentUser = response.user;
         updateAuthState();
         showToast('Login realizado com sucesso!');
         form.reset();
     } catch (error: any) {
+        // exibe erro de login
         showToast(error.message || 'Erro ao fazer login', 'error');
     }
 }
 
-// trata criacao de nova conta
+// processa o cadastro de um novo usuário
 async function handleRegister(event: Event): Promise<void> {
     event.preventDefault();
     
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
+    // validação de senha igual
     const password = formData.get('password') as string;
     const confirmPassword = formData.get('confirm_password') as string;
-    
     if (password !== confirmPassword) {
         showToast('As senhas não coincidem', 'error');
         return;
     }
-    
+    // monta objeto de cadastro
     const registerData = {
         name: formData.get('name') as string,
         email: formData.get('email') as string,
@@ -241,42 +246,43 @@ async function handleRegister(event: Event): Promise<void> {
         user_type: formData.get('user_type') as string,
         password: password
     };
-    
     try {
+        // faz requisição de cadastro
         await makeRequest('/auth/register', {
             method: 'POST',
             body: JSON.stringify(registerData)
         });
-        
         showToast('Conta criada com sucesso! Faça login para continuar.');
         form.reset();
     } catch (error: any) {
+        // exibe erro de cadastro
         showToast(error.message || 'Erro ao criar conta', 'error');
     }
 }
 
-// trata envio de email de recuparacao
+// envia solicitação de recuperação de senha
 async function handleForgotPassword(event: Event): Promise<void> {
     event.preventDefault();
     
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
+    // pega email do form
     const email = formData.get('email') as string;
-    
     try {
+        // faz requisição de recuperação de senha
         await makeRequest('/auth/forgot-password', {
             method: 'POST',
             body: JSON.stringify({ email })
         });
-        
         showToast('Link de recuperação enviado para seu email!');
         form.reset();
     } catch (error: any) {
+        // exibe erro de recuperação
         showToast(error.message || 'Erro ao enviar link de recuperação', 'error');
     }
 }
 
-// realiza logout local removendo token
+// faz logout do usuário removendo o token
 function logout(): void {
     localStorage.removeItem('auth_token');
     currentUser = null;
@@ -284,7 +290,7 @@ function logout(): void {
     showToast('Logout realizado com sucesso!');
 }
 
-// carrega dados do perfil no formulario
+// carrega os dados do perfil do usuário no formulário
 async function loadProfile(): Promise<void> {
     if (!currentUser) {
         await checkAuthStatus();
@@ -305,7 +311,7 @@ async function loadProfile(): Promise<void> {
     if (userTypeSelect) userTypeSelect.value = currentUser.user_type || '';
 }
 
-// envia atualizacao do perfil para a api
+// envia atualização dos dados do perfil para a api
 async function handleProfileUpdate(event: Event): Promise<void> {
     event.preventDefault();
     
@@ -330,13 +336,13 @@ async function handleProfileUpdate(event: Event): Promise<void> {
     }
 }
 
-// abre modal para trocar senha
+// abre o modal para troca de senha
 function changePassword(): void {
     const modal = document.getElementById('password-modal') as HTMLElement;
     modal.classList.add('show');
 }
 
-// fecha modal de troca de senha e reseta formulario
+// fecha o modal de troca de senha e reseta o formulário
 function closePasswordModal(): void {
     const modal = document.getElementById('password-modal') as HTMLElement;
     const form = document.getElementById('password-form') as HTMLFormElement;
@@ -344,7 +350,7 @@ function closePasswordModal(): void {
     form.reset();
 }
 
-// processa alteracao de senha enviando para a api
+// processa a troca de senha do usuário
 async function handlePasswordChange(event: Event): Promise<void> {
     event.preventDefault();
     
@@ -376,25 +382,27 @@ async function handlePasswordChange(event: Event): Promise<void> {
     }
 }
 
-// carrega lista de vagas com filtros opcionais
+// carrega a lista de vagas disponíveis com filtros
 async function loadSpots(filters: any = {}): Promise<void> {
     const container = document.getElementById('spots-grid');
 
+    // mostra loading enquanto carrega
     if (container) {
         container.innerHTML = '<div class="loading">Carregando...</div>';
     }
 
     try {
+        // monta query de filtros
         const queryParams = new URLSearchParams();
         if (filters.location) queryParams.append('location', filters.location);
         if (filters.type) queryParams.append('type', filters.type);
         if (filters.max_price) queryParams.append('max_price', filters.max_price);
-        
+        // busca vagas filtradas
         const endpoint = `/spots/?${queryParams.toString()}`;
         const spots = await makeRequest(endpoint);
         renderSpots(spots, 'spots-grid');
-        
     } catch (error: any) {
+        // exibe erro e mensagem na tela
         showToast(error.message || 'Erro ao carregar vagas', 'error');
         if (container) {
             container.innerHTML = '<p class="text-center">Erro ao carregar vagas</p>';
@@ -402,7 +410,7 @@ async function loadSpots(filters: any = {}): Promise<void> {
     }
 }
 
-// carrega vagas do proprietario atual (dashboard)
+// carrega as vagas cadastradas pelo proprietário
 async function loadMySpots(): Promise<void> {
     if (!currentUser) {
         await checkAuthStatus();
@@ -452,7 +460,7 @@ async function loadMySpots(): Promise<void> {
     }
 }
 
-// renderiza cards de vagas dentro de um container
+// renderiza os cards de vagas em um container
 function renderSpots(spots: Spot[], containerId: string, isOwner: boolean = false, pendingMap?: Record<string, number>): void {
     const container = document.getElementById(containerId)!;
 
@@ -536,7 +544,7 @@ function renderSpots(spots: Spot[], containerId: string, isOwner: boolean = fals
     }).join('');
 }
 
-// retorna label legivel para o tipo da vaga
+// retorna o nome legível do tipo de vaga
 function getTypeLabel(type: string): string {
     const labels: { [key: string]: string } = {
         'covered': 'Coberta',
@@ -547,7 +555,7 @@ function getTypeLabel(type: string): string {
     return labels[type] || type;
 }
 
-// monta filtros e dispara busca de vagas
+// monta filtros e executa a busca de vagas
 function searchSpots(): void {
     const location = (document.getElementById('search-location') as HTMLInputElement).value;
     const type = (document.getElementById('search-type') as HTMLSelectElement).value;
@@ -562,7 +570,7 @@ function searchSpots(): void {
     loadSpots(filters);
 }
 
-// abre modal para adicionar uma nova vaga
+// abre o modal para adicionar uma nova vaga
 function showAddSpotModal(): void {
     if (!currentUser) {
         showToast('Faça login para adicionar uma vaga', 'error');
@@ -579,7 +587,7 @@ function showAddSpotModal(): void {
     modal.classList.add('show');
 }
 
-// carrega dados de uma vaga para edicao
+// carrega os dados de uma vaga para edição
 async function editSpot(spotId: string): Promise<void> {
     currentEditingSpotId = spotId;
     
@@ -604,7 +612,7 @@ async function editSpot(spotId: string): Promise<void> {
     }
 }
 
-// fecha modal de vaga e reseta estado
+// fecha o modal de vaga e reseta o formulário
 function closeSpotModal(): void {
     const modal = document.getElementById('spot-modal') as HTMLElement;
     const form = document.getElementById('spot-form') as HTMLFormElement;
@@ -613,7 +621,7 @@ function closeSpotModal(): void {
     currentEditingSpotId = null;
 }
 
-// envia criacao ou atualizacao de vaga para a api
+// envia criação ou atualização de vaga para a api
 async function handleSpotSubmit(event: Event): Promise<void> {
     event.preventDefault();
     
@@ -659,7 +667,7 @@ async function handleSpotSubmit(event: Event): Promise<void> {
     }
 }
 
-// exclui vaga por id apos confirmacao
+// exclui uma vaga após confirmação
 async function deleteSpot(spotId: string): Promise<void> {
     if (!confirm('Tem certeza que deseja excluir esta vaga?')) {
         return;
@@ -675,7 +683,7 @@ async function deleteSpot(spotId: string): Promise<void> {
     }
 }
 
-// inicia fluxo para solicitar aluguel de uma vaga
+// inicia o fluxo para solicitar aluguel de uma vaga
 async function rentSpot(spotId: string): Promise<void> {
     if (!currentUser) {
         showToast('Faça login para alugar uma vaga', 'error');
@@ -691,7 +699,7 @@ async function rentSpot(spotId: string): Promise<void> {
     openRentModal(spotId);
 }
 
-// abre modal de solicitacao de aluguel e preenche preco
+// abre o modal de solicitação de aluguel e preenche o preço
 function openRentModal(spotId: string, price?: number): void {
     const modal = document.getElementById('rent-modal') as HTMLElement;
     const title = document.getElementById('rent-modal-title') as HTMLElement;
@@ -734,7 +742,7 @@ function openRentModal(spotId: string, price?: number): void {
     calculateRentTotal();
 }
 
-// fecha modal de aluguel e limpa campos temporarios
+// fecha o modal de aluguel e limpa os campos
 function closeRentModal(): void {
     const modal = document.getElementById('rent-modal') as HTMLElement;
     const form = document.getElementById('rent-form') as HTMLFormElement;
@@ -755,7 +763,7 @@ function closeRentModal(): void {
     if (total) total.textContent = 'R$ 0,00';
 }
 
-// calcula duracao e total estimado com base nas datas e preco mensal
+// calcula a duração e o valor total do aluguel
 function calculateRentTotal(): void {
     const start = (document.getElementById('rent-start') as HTMLInputElement).value;
     const end = (document.getElementById('rent-end') as HTMLInputElement).value;
@@ -788,7 +796,7 @@ function calculateRentTotal(): void {
     if (totalElem) totalElem.textContent = `R$ ${total.toFixed(2)}`;
 }
 
-// submete pedido de aluguel checando disponibilidade localmente
+// envia solicitação de aluguel após checar disponibilidade
 async function submitRentRequest(event: Event): Promise<void> {
     event.preventDefault();
 
@@ -852,7 +860,7 @@ async function submitRentRequest(event: Event): Promise<void> {
     }
 }
 
-// carrega aluguels do usuario atual (inquilino ou proprietario)
+// carrega os aluguéis do usuário atual
 async function loadMyRentals(): Promise<void> {
     if (!currentUser) {
         await checkAuthStatus();
