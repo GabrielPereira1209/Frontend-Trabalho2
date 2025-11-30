@@ -628,6 +628,7 @@ async function handleSpotSubmit(event: Event): Promise<void> {
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
 
+    // monta objeto de vaga a partir do form
     const spotData = {
         title: formData.get('title') as string,
         description: formData.get('description') as string,
@@ -638,24 +639,22 @@ async function handleSpotSubmit(event: Event): Promise<void> {
     };
     
     try {
+        // decide se é edição ou criação de vaga
         if (currentEditingSpotId) {
             await makeRequest(`/spots/${currentEditingSpotId}/`, {
                 method: 'PUT',
                 body: JSON.stringify(spotData)
             });
-
             showToast('Vaga atualizada com sucesso!');
         } else {
             await makeRequest('/spots/', {
                 method: 'POST',
                 body: JSON.stringify(spotData)
             });
-
             showToast('Vaga adicionada com sucesso!');
         }
-        
+        // fecha modal e recarrega lista
         closeSpotModal();
-
         const currentPath = window.location.pathname;
         if (currentPath.includes('my-spots.html')) {
             loadMySpots();
@@ -663,6 +662,7 @@ async function handleSpotSubmit(event: Event): Promise<void> {
             loadSpots();
         }
     } catch (error: any) {
+        // exibe erro ao salvar vaga
         showToast(error.message || 'Erro ao salvar vaga', 'error');
     }
 }
@@ -826,36 +826,33 @@ async function submitRentRequest(event: Event): Promise<void> {
     }
 
     try {
-
+        // verifica se já existe reserva ativa para o período
         try {
             const existing: any[] = await makeRequest(`/rentals/?spot_id=${spotId}`) || [];
-
             const overlaps = existing.filter(r => r.status === 'active' && r.start_date && r.end_date).some(r => {
                 const rs = parseDateSafe(r.start_date);
                 const re = parseDateSafe(r.end_date);
                 if (!rs || !re) return false;
-
                 return s <= re && rs <= e;
             });
-
             if (overlaps) {
                 showToast('Período indisponível: já existe reserva ativa para parte desse intervalo', 'error');
                 return;
             }
         } catch (err) {
+            // erro ao checar disponibilidade, segue fluxo
             console.debug('submitRentRequest: could not verify availability', err);
         }
-
+        // envia solicitação de aluguel
         await makeRequest('/rentals/', {
             method: 'POST',
             body: JSON.stringify({ spot_id: spotId, start_date: start, end_date: end })
         });
-
         showToast('Solicitação de aluguel enviada com sucesso!');
         closeRentModal();
-
         loadSpots();
     } catch (error: any) {
+        // exibe erro ao solicitar aluguel
         showToast(error.message || 'Erro ao solicitar aluguel', 'error');
     }
 }
@@ -1009,8 +1006,10 @@ function renderRentals(rentals: Rental[]): void {
 
 // aceita uma solicitacao de aluguel alterando status para active
 async function acceptRental(rentalId: string): Promise<void> {
+    // confirma ação antes de aceitar
     if (!confirm('Aceitar este pedido de aluguel?')) return;
     try {
+        // atualiza status para active
         await makeRequest(`/rentals/${rentalId}/`, {
             method: 'PATCH',
             body: JSON.stringify({ status: 'active' })
@@ -1018,14 +1017,17 @@ async function acceptRental(rentalId: string): Promise<void> {
         showToast('Reserva aceita.');
         await loadMyRentals();
     } catch (error: any) {
+        // exibe erro ao aceitar
         showToast(error.message || 'Erro ao aceitar reserva', 'error');
     }
 }
 
 // recusa uma solicitacao de aluguel alterando status para cancelled
 async function rejectRental(rentalId: string): Promise<void> {
+    // confirma ação antes de recusar
     if (!confirm('Recusar este pedido de aluguel?')) return;
     try {
+        // atualiza status para cancelled
         await makeRequest(`/rentals/${rentalId}/`, {
             method: 'PATCH',
             body: JSON.stringify({ status: 'cancelled' })
@@ -1033,6 +1035,7 @@ async function rejectRental(rentalId: string): Promise<void> {
         showToast('Reserva recusada.');
         await loadMyRentals();
     } catch (error: any) {
+        // exibe erro ao recusar
         showToast(error.message || 'Erro ao recusar reserva', 'error');
     }
 }
@@ -1315,14 +1318,18 @@ function renderCalendarModal(spotId: string): void {
 
 // garante cache de bookings e renderiza calendario fresquinho
 async function ensureBookingsAndRenderCalendar(spotId: string): Promise<void> {
+    // busca reservas e reseta mês do calendário
     await loadBookingsForSpot(spotId);
     rentCalendarMonthOffset = 0;
     renderCalendarModal(spotId);
 }
 
+
+// inicializa eventos e carrega dados ao abrir a página
 document.addEventListener('DOMContentLoaded', async () => {
     await checkAuthStatus();
 
+    // carrega dados da página correta
     const currentPath = window.location.pathname;
     if (currentPath.includes('search.html')) {
         await loadSpots();
@@ -1333,21 +1340,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else if (currentPath.includes('profile.html')) {
         await loadProfile();
     }
-    
+    // menu do usuário
     const userMenuBtn = document.getElementById('user-menu-btn');
     const userMenu = document.getElementById('user-menu');
-    
     if (userMenuBtn && userMenu) {
         userMenuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             userMenu.classList.toggle('show');
         });
-        
         document.addEventListener('click', () => {
             userMenu.classList.remove('show');
         });
     }
     
+    // fecha modais ao clicar fora
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         modal.addEventListener('click', (e) => {
@@ -1356,7 +1362,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     });
-    
+
+    // busca ao pressionar enter nos filtros
     const searchInputs = ['search-location', 'search-max-price'];
     searchInputs.forEach(inputId => {
         const input = document.getElementById(inputId);
@@ -1372,6 +1379,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
+
+// expõe funções globais para uso nos templates
 (window as any).editSpot = editSpot;
 (window as any).deleteSpot = deleteSpot;
 (window as any).rentSpot = rentSpot;
