@@ -92,7 +92,6 @@ Usuários comuns e proprietários têm acesso a páginas e funcionalidades difer
 - Validação básica de formulários de login, cadastro e edição.
 - Busca de vagas com filtros.
 - Visualização e edição de perfil.
-- Responsividade do layout.
 - Simulação de diferentes visões para usuários comuns e proprietários.
 - Simulação de troca e recuperação de senha.
 
