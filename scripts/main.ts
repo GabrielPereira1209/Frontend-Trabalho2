@@ -110,7 +110,6 @@ async function makeRequest(url: string, options: RequestInit = {}): Promise<any>
         
         return await response.json();
     } catch (error: any) {
-        console.error('API Request failed:', error);
         throw error;
     }
 }
@@ -188,7 +187,6 @@ async function checkAuthStatus(): Promise<void> {
         currentUser = user;
         updateAuthState();
     } catch (error) {
-        console.error('Auth check failed:', error);
         localStorage.removeItem('auth_token');
         currentUser = null;
         updateAuthState();
@@ -393,9 +391,7 @@ async function loadSpots(filters: any = {}): Promise<void> {
         if (filters.max_price) queryParams.append('max_price', filters.max_price);
         
         const endpoint = `/spots/?${queryParams.toString()}`;
-        console.log('Fetching spots from endpoint:', endpoint);
         const spots = await makeRequest(endpoint);
-        console.log('loadSpots received:', spots);
         renderSpots(spots, 'spots-grid');
         
     } catch (error: any) {
@@ -444,7 +440,6 @@ async function loadMySpots(): Promise<void> {
                 }
             });
         } catch (err) {
-            console.debug('Could not load rentals for pending map', err);
             pendingMap = undefined;
         }
 
@@ -460,8 +455,6 @@ async function loadMySpots(): Promise<void> {
 // renderiza cards de vagas dentro de um container
 function renderSpots(spots: Spot[], containerId: string, isOwner: boolean = false, pendingMap?: Record<string, number>): void {
     const container = document.getElementById(containerId)!;
-    console.log(`renderSpots called for container="${containerId}" with spots:`, spots);
-    console.debug('renderSpots currentUser:', currentUser);
 
     if (spots.length === 0) {
         container.innerHTML = '<p class="text-center">Nenhuma vaga encontrada</p>';
@@ -494,30 +487,12 @@ function renderSpots(spots: Spot[], containerId: string, isOwner: boolean = fals
             } else if (userEmail && ownerEmail && ownerEmail === userEmail) {
                 spotIsOwner = true;
             } else if (userEmail && ownerId && ownerId === userEmail) {
-
                 spotIsOwner = true;
             }
 
-            if (!spotIsOwner) {
-                console.debug('renderSpots ownership check: not owner', {
-                    spotId: spot.id,
-                    ownerRaw: (spot as any).owner,
-                    ownerId,
-                    ownerEmail,
-                    userId,
-                    userEmail,
-                    isOwnerFlag: isOwner
-                });
-            } else {
-                console.debug('renderSpots ownership check: owner detected', { spotId: spot.id, ownerId, ownerEmail, userId, userEmail });
-            }
         }
 
         const showOwnerActions = spotIsOwner && currentUser && currentUser.user_type === 'landlord';
-
-        if (spotIsOwner && currentUser && currentUser.user_type !== 'landlord') {
-            console.debug('renderSpots: owner detected but current user is not landlord — hiding owner actions', { spotId: spot.id, userType: currentUser.user_type });
-        }
 
         const pendingCount = pendingMap && pendingMap[String(spot.id)] ? pendingMap[String(spot.id)] : 0;
 
@@ -846,7 +821,6 @@ async function submitRentRequest(event: Event): Promise<void> {
 
         try {
             const existing: any[] = await makeRequest(`/rentals/?spot_id=${spotId}`) || [];
-            console.debug('submitRentRequest: existing rentals for spot', { spotId, existing });
 
             const overlaps = existing.filter(r => r.status === 'active' && r.start_date && r.end_date).some(r => {
                 const rs = parseDateSafe(r.start_date);
@@ -862,7 +836,6 @@ async function submitRentRequest(event: Event): Promise<void> {
             }
         } catch (err) {
             console.debug('submitRentRequest: could not verify availability', err);
-
         }
 
         await makeRequest('/rentals/', {
@@ -1134,7 +1107,6 @@ async function loadBookingsForSpot(spotId: string): Promise<Set<string>> {
         (window as any)._spotBookingsInfo[spotId] = infoMap;
         return booked;
     } catch (err) {
-        console.debug('loadBookingsForSpot failed', err);
         return new Set();
     }
 }
