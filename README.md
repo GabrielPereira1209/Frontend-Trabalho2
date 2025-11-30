@@ -12,6 +12,9 @@
 
 Este repositório contém o **Frontend** do projeto VagasJá. O objetivo é simular uma plataforma de aluguel de vagas de estacionamento, permitindo que usuários busquem vagas, realizem cadastros, visualizem seus aluguéis e gerenciem suas vagas como proprietários.
 
+Para acessar nosso site postado está em:
+aviv02.pythonanywhere.com
+
 ---
 
 ## Requisitos Atendidos
